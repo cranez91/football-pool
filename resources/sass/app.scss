@@ -1,0 +1,30 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+.bg-dark-blue {
+    background-color: #1a202c; /* Color */
+    color: #fff; /* Color de texto para el contraste */
+}
+
+.bg-dark-green {
+    background-color: #0e5121; /* Color */
+    color: #fff; /* Color de texto para el contraste */
+}
+
+.bg-dark-orange {
+    background-color: #973308; /* Color */
+    color: #fff; /* Color de texto para el contraste */
+}
+
+.rounded-image {
+    border-radius: 50%;
+    width: 40px; /* Ajusta el tamaño según tus necesidades */
+    height: 40px; /* Ajusta el tamaño según tus necesidades */
+    object-fit: cover; /* Asegura que la imagen se ajuste al contenedor */
+  }

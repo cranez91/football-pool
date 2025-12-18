@@ -13,7 +13,7 @@ use App\Services\RapidApi;
 use App\Models\League;
 use App\Models\Round;
 use App\Models\Matchday;
-use App\Models\Match;
+use App\Models\Matchup;
 use App\Models\Season;
 use App\Models\Game;
 use Carbon\Carbon;
@@ -44,73 +44,120 @@ class FeedingLeagueRounds implements ShouldQueue
         Log::info('Fetching league rounds in background.');
         
         foreach (League::fromActiveCountry() as $league) {
-            $activeSeason = Season::where([
-                ['current', '=', 1],
-                ['league_id', '=', $league->id],
-            ])
-            ->first();
+            $activeSeason = $this->getCurrentSeason($league->id);
             $current = RapidApi::getRoundsByLeague($league->id, $activeSeason->year, true);
             $rounds = RapidApi::getRoundsByLeague($league->id, $activeSeason->year);
+            Log::info('Fetching rounds:', ['current' => json_encode($current), 'data' => json_encode($rounds)]);
+            
             $numRounds = sizeof($rounds);
             foreach ($rounds as $index => $round) {
-                $lstRounds[$round] = Round::firstOrCreate( ['name' => $round],
-                    [
-                        'current' => $current[0] == $round ? 1 : 0,
-                        'league_id' => $league->id,
-                    ]
-                );
+                $rnd = $this->createRound($current, $round, $league->id);
+                $lstRounds[$round] = $rnd;
 
-                $lstMatchdays[$round] = Matchday::firstOrCreate( ['name' => $round],
-                    [
-                        'slug' => Str::slug($round, '-'),
-                        'current' => $current[0] == $round ? 1 : 0,
-                        'league_id' => $league->id,
-                        'active' => 0,
-                        'price' => config('app.matchday_price'),
-                    ]
-                );
+                $mday = $this->createMatchday($current, $round, $league->id);
+                $lstMatchdays[$round] = $mday;
             }
 
             $games = RapidApi::getFixturesByLeague($league->id, $activeSeason->year);
             foreach ($games as $game) {
                 $gameRound = $lstRounds[$game['league']['round']];
                 $objMatchday = $lstMatchdays[$game['league']['round']];
-                $timestamp = Carbon::createFromTimestamp($game['fixture']['timestamp'], 'America/Mexico_city');
+                if (!$game['fixture']['timestamp']) {
+                    $timestamp = Carbon::now('America/Mexico_city');
+                } else {
+                    $timestamp = Carbon::createFromTimestamp($game['fixture']['timestamp'], 'America/Mexico_city');
+                }
+                //$timestamp->subHour(1); // this is because the modern mexico time
 
-                $timestamp->subHour(1); // this is because the modern mexico time
+                $newGame = $this->createGame($gameRound->id, $game, $timestamp);
 
-                $newGame = Game::firstOrCreate( ['id' => $game['fixture']['id']],
-                    [
-                        'round_id' => $gameRound->id,
-                        'home_id' => $game['teams']['home']['id'], 
-                        'away_id' => $game['teams']['away']['id'], 
-                        'home_score' => $game['goals']['home'], 
-                        'away_score' => $game['goals']['away'], 
-                        'referee' => $game['fixture']['referee'], 
-                        'date' => $timestamp->format('Y-m-d'),
-                        'time' => $timestamp->format('H:i'), 
-                        'status' => $game['fixture']['status']['short']
-                    ]
-                );
-
-                $match = Match::firstOrCreate( ['game_id' => $game['fixture']['id'] ],
+                $match = Matchup::firstOrCreate( ['game_id' => $game['fixture']['id'] ],
                     [
                         'matchday_id' => $objMatchday->id
                     ]
                 );
+
+                if ($game['fixture']['status']['short'] === 'FT') {
+                    if ($game['goals']['home'] > $game['goals']['away']) {
+                        $match->result = 'L';
+                    } elseif ($game['goals']['away'] > $game['goals']['home']) {
+                        $match->result = 'V';
+                    } else {
+                        $match->result = 'E';
+                    }
+                    $match->update();
+                }
             }
         }
 
         foreach ($lstMatchdays as $matchday) {
             $matches = $matchday->matches()->orderBy('created_at', 'asc')->get();
-            $firstGame = $matches->first()->game;
-            $lastGame = $matches->last()->game;
-            $matchday->number_matches = $matches->count();
-            $matchday->start_date = $firstGame->date . ' ' . $firstGame->time;
-            $matchday->end_date = $lastGame->date . ' ' . $lastGame->time;
-            $matchday->update();
+            if ($matches->count() > 0) {
+                $firstGame = $matches->first()->game;
+                $lastGame = $matches->last()->game;
+                $matchday->number_matches = $matches->count();
+                $matchday->start_date = $firstGame->date . ' ' . $firstGame->time;
+                $matchday->end_date = $lastGame->date . ' ' . $lastGame->time;
+                $matchday->update();
+            }
         }
         
         Log::info('Fetching league rounds finished.');
+    }
+
+    private function getCurrentSeason($leagueId) {
+        return Season::where([ ['current', '=', 1], ['league_id', '=', $leagueId] ])
+            ->first();
+    }
+
+    private function createRound($current, $round, $leagueId) {
+        $isCurrent = $current[0] == $round ? 1 : 0;
+        $rnd = Round::firstOrCreate( ['name' => $round],
+            [
+                'league_id' => $leagueId,
+                'current' => 0,
+            ]
+        );
+        $rnd->current = $isCurrent;
+        $rnd->update();
+        return $rnd;
+    }
+
+    private function createMatchday($current, $round, $leagueId) {
+        $isCurrent = $current[0] == $round ? 1 : 0;
+        $mday = Matchday::firstOrCreate( ['name' => $round],
+            [
+                'slug' => Str::slug($round, '-'),
+                'league_id' => $leagueId,
+                'current' => 0,
+                'active' => 0,
+                'price' => config('app.matchday_price'),
+            ]
+        );
+        $mday->current = $isCurrent;
+        $mday->update();
+        return $mday;
+    }
+
+    private function createGame ($gameRoundId, $game, $timestamp) {
+        $newGame = Game::firstOrCreate( ['id' => $game['fixture']['id']],
+            [
+                'round_id' => $gameRoundId,
+                'home_id' => $game['teams']['home']['id'], 
+                'away_id' => $game['teams']['away']['id'], 
+                'home_score' => 0, 
+                'away_score' => 0, 
+                'referee' => $game['fixture']['referee'], 
+                'date' => $timestamp->format('Y-m-d'),
+                'time' => $timestamp->format('H:i'), 
+                'status' => ''
+            ]
+        );
+        Log::info('createGame:', [ 'game' => $game]);
+        $newGame->home_score = $game['goals']['home'];
+        $newGame->away_score = $game['goals']['away'];
+        $newGame->status = $game['fixture']['status']['short'];
+        $newGame->update();
+        return $newGame;
     }
 }

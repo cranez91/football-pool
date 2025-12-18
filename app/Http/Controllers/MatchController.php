@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Match;
+use App\Models\Matchup;
 use App\Http\Requests\StoreMatchRequest;
 use App\Http\Requests\UpdateMatchRequest;
 
@@ -36,17 +36,17 @@ class MatchController extends Controller
      */
     public function store(StoreMatchRequest $request)
     {
-        Match::create($request->all());
+        Matchup::create($request->all());
         return response()->json(null, 200);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Match  $match
+     * @param  \App\Models\Matchup  $match
      * @return \Illuminate\Http\Response
      */
-    public function show(Match $match)
+    public function show(Matchup $match)
     {
         //
     }
@@ -54,10 +54,10 @@ class MatchController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Match  $match
+     * @param  \App\Models\Matchup  $match
      * @return \Illuminate\Http\Response
      */
-    public function edit(Match $match)
+    public function edit(Matchup $match)
     {
         //
     }
@@ -66,10 +66,10 @@ class MatchController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \App\Http\Requests\UpdateMatchRequest  $request
-     * @param  \App\Models\Match  $match
+     * @param  \App\Models\Matchup  $match
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateMatchRequest $request, Match $match)
+    public function update(UpdateMatchRequest $request, Matchup $match)
     {
         foreach (array_keys( $request->all() ) as $property) {
             $match->{$property} = $request->input( $property );
@@ -81,10 +81,10 @@ class MatchController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Match  $match
+     * @param  \App\Models\Matchup  $match
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Match $match)
+    public function destroy(Matchup $match)
     {
         $match->delete();
         return response()->json(null, 200);

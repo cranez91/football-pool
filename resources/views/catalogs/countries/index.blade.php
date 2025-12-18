@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 <div class="row justify-content-center">
     <div class="col-12">
         <div class="card">
@@ -16,6 +21,7 @@
                                     <th scope="col">País</th>
                                     <th scope="col">Bandera</th>
                                     <th scope="col">Activo</th>
+                                    <th scope="col">Jornadas</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -34,6 +40,21 @@
                                             <img src="{{ $country->flag }}" class="img-thumbnail" style="width: 3em;">    
                                         </td>
                                         <td>{{ $country->is_active }}</td>
+                                        <td>
+                                            <form
+                                                action="{{ route('rounds.update') }}"
+                                                method="POST"
+                                                enctype="multipart/form-data"
+                                            >
+                                                @csrf
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-primary"
+                                                >
+                                                    Actualizar
+                                                </button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

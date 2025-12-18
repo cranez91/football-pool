@@ -4,21 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Matchday extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'matchdays';
     protected $primaryKey = 'id';
     public $incrementing = true;
-    protected $appends = ['is_active', 'is_current', 'formatted_price', 'formatted_prize'];
+    protected $appends = ['is_active','is_visible', 'is_current', 'formatted_price', 'formatted_prize'];
     protected $fillable = [
         'slug',
         'name', 
         'number_matches', 
         'current',
         'active',
+        'visible',
         'league_id',
         'price', 
         'high_prize', 
@@ -36,7 +38,7 @@ class Matchday extends Model
         return $this->hasMany('App\Models\Game', 'round_id', 'id');
         return $this->hasManyThrough(
             'App\Models\Game',
-            'App\Models\Match',
+            'App\Models\Matchup',
             'game_id', // Foreign key on the environments table...
             'match_id', // Foreign key on the deployments table...
             'id', // Local key on the projects table...
@@ -46,7 +48,7 @@ class Matchday extends Model
 
     public function matches()
     {
-        return $this->hasMany('App\Models\Match', 'matchday_id', 'id');
+        return $this->hasMany('App\Models\Matchup', 'matchday_id', 'id');
     }
 
     public function userMatchdays()
@@ -72,6 +74,11 @@ class Matchday extends Model
     public function getIsActiveAttribute()
     {
         return $this->attributes['active'] ? 'Si' : 'No';
+    }
+
+    public function getIsVisibleAttribute()
+    {
+        return $this->attributes['visible'] ? 'Si' : 'No';
     }
 
     public function getIsCurrentAttribute()

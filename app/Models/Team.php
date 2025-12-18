@@ -17,6 +17,7 @@ class Team extends Model
         'id',
         'code',
         'name',
+        'nickname',
         'logo',
         'active',
         'city',

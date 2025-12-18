@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserMatchday;
+use App\Models\Distribuitor;
 use App\Http\Requests\StoreUserMatchdayRequest;
 use App\Http\Requests\UpdateUserMatchdayRequest;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class UserMatchdayController extends Controller
         $requestData = $request->validated();
         $matchday = $service->getItemBySlug( $requestData['matchday_slug'] );
         $userMatch = $userMatchdayService->insert( array_merge(
-            ['uuid' => (string) Str::uuid()],
+            ['uuid' => Str::upper( Str::random(10) )],
             ['user_id' => Auth::id(), 'matchday_id' => $matchday->id], 
             $request->safe()->only(['paid', 'winner'])
         ) );
@@ -88,6 +89,12 @@ class UserMatchdayController extends Controller
     {
         foreach (array_keys( $request->safe()->except(['_method']) ) as $property) {
             $userMatchday->{$property} = $request->input( $property );
+        }
+        if ($request->has('distribuitor')) {
+           $dist = Distribuitor::where('name', $request->input('distribuitor'))->first();
+           if ($dist) {
+               $userMatchday->distribuitor_id = $dist->id;
+           }
         }
         $userMatchday->update();
         return back()->with('status', '¡La quiniela ha sido pagada!');

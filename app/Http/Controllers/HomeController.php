@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\League;
 use App\Models\Round;
 use App\Models\Matchday;
+use App\Models\Distribuitor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
@@ -42,16 +43,19 @@ class HomeController extends Controller
         return view('play.index', compact('leagues'));
     }
 
+    /**
+     * Listar las jornadas de la liga
+     */
     public function leagueRounds(string $slug)
     {
         $rounds = Matchday::with(['games' => function ($query) {
             $query->orderBy('date', 'asc')->orderBy('time', 'asc');
-        }, 'games.home.broadcaster', 'games.away'])
+        }, 'games.home.broadcaster', 'games.away', 'league'])
         ->whereHas('league', function(Builder $query) use ($slug) {
             return $query->where('slug', '=', $slug);
         })
-        ->orderBy('id', 'asc')
-        ->limit(5)
+        ->where('visible', 1)
+        ->orderBy('id', 'desc')
         ->get();
         return view('play.rounds', compact('rounds'));
     }
@@ -63,16 +67,20 @@ class HomeController extends Controller
             $query->orderBy('date', 'asc')->orderBy('time', 'asc');
             },'userMatchdays' => function ($query) use ($userId) {
                 $query->where('user_id', $userId);
-            }, 'games.home.broadcaster', 'games.away', 'userMatchdays.userMatches', 'userMatchdays.matchday'])
+            }, 'games.home.broadcaster', 'league', 'games.away', 'userMatchdays.userMatches', 'userMatchdays.matchday'])
             ->where('slug', $slug)
             ->first();
-        return view('play.quiniela', compact('round'));
+        $distribuitors = Distribuitor::all();
+        return view('play.quiniela', compact('round', 'distribuitors'));
     }
 
     public function gamers(string $slug)
     {
         $matchday = Matchday::with([
             'league',
+            'games',
+            'games.home.broadcaster',
+            'games.away',
             'userMatchdays',
             'userMatchdays.user',
             'userMatchdays.userMatches' => function ($query) {

@@ -1,8 +1,9 @@
-<div class="col-12 col-md-10 mt-2">
+<div class="col-12 mt-2">
     <div class="table-responsive mt-2">
         <table class="table bg-dark-blue text-white ">
             <thead>
-                <tr class="bg-secondary text-black">
+                <tr class=" text-white">
+                    <th> Folio </th>
                     <th> Pagada </th>
                     <th> Participante </th>
                     <th class="text-center" colspan="{{ $round->games()->count() }}">
@@ -13,6 +14,7 @@
             <tbody>
                 @foreach($round->userMatchdays as $userMatchday)
                     <tr>
+                        <td> {{ $userMatchday->uuid }} </td>
                         <td> {{ $userMatchday->is_paid }} </td>
                         <td> {{Auth::user()->name}} </td>
                         @foreach($userMatchday->userMatches as $userMatch)
@@ -20,9 +22,17 @@
                         @endforeach
                     </tr>
                 @endforeach
-                <tr class="bg-secondary text-black">
-                    <td colspan="{{ $round->games()->count() + 2 }}">
-                        Por pagar: ${{ $round->price * $round->userMatchdays()->where('paid', 0)->count() }}
+                <tr class="text-white">
+                    <td colspan="{{ $round->games()->count() + 3 }}">
+                        @php 
+                            $userMatchdays = $round->userMatchdays()
+                                ->where('user_id', Auth::user()->id)
+                                ->where('paid', 0)
+                                ->count();
+                        @endphp
+                        <strong class="text-yellow">
+                            Por pagar: ${{ $round->price * $userMatchdays }}
+                        </strong>
                     </td>
                 </tr>
             </tbody>

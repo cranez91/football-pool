@@ -25,6 +25,6 @@ class UserMatch extends Model
 
     public function match()
     {
-        return $this->belongsTo('App\Models\Match', 'match_id', 'id');
+        return $this->belongsTo('App\Models\Matchup', 'match_id', 'id');
     }
 }

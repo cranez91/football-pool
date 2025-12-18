@@ -17,6 +17,7 @@ class CreateTeamsTable extends Migration
             $table->unsignedBigInteger('id');
             $table->string('code',5)->nullable();
             $table->string('name', 100);
+            $table->string('nickname', 100);
             $table->string('logo', 300);
             $table->string('city', 100);
             $table->string('stadium', 100);

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Country;
 use App\Http\Requests\StoreCountryRequest;
 use App\Http\Requests\UpdateCountryRequest;
+use App\Jobs\FeedingLeagueRounds;
+use App\Jobs\CheckingWinners;
 
 class CountryController extends Controller
 {
@@ -87,5 +89,17 @@ class CountryController extends Controller
     {
         $country->delete();
         return response()->json(null, 200);
+    }
+
+    public function updateLeagueRounds()
+    {
+        dispatch(new FeedingLeagueRounds());
+        return redirect()->back()->with('success', 'El proceso de actualización está siendo ejecutado.');
+    }
+
+    public function updateLeagueRoundsSuccesses()
+    {
+        dispatch(new CheckingWinners());
+        return redirect()->back()->with('success', 'El proceso de actualización está siendo ejecutado.');
     }
 }

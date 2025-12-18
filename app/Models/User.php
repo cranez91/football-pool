@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'type',
         'email',
+        'whatsapp',
         'password',
         'facebook_id',
         'profile_photo'
@@ -55,4 +56,9 @@ class User extends Authenticatable
     protected $appends = [
         'profile_photo_url',
     ];
+
+    public function userMatches()
+    {
+        return $this->hasMany('App\Models\UserMatchday', 'user_id', 'id');
+    }
 }

@@ -24,9 +24,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('feed:catalogs')->everyMinute();
+        /*$schedule->command('feed:catalogs')->everyMinute();
         $schedule->command('feed:rounds')->everyMinute();
-        $schedule->command('check:winners')->everyMinute();
+        $schedule->command('check:winners')->everyMinute();*/
 
         /*$schedule->command('feed:catalogs')->monthlyOn(1, '5:00');*/
         /*$schedule->command('feed:rounds')->weeklyOn(2, '13:00');*/

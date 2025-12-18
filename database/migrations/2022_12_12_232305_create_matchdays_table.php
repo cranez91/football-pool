@@ -21,12 +21,14 @@ class CreateMatchdaysTable extends Migration
             $table->unsignedBigInteger('league_id');
             $table->smallInteger('number_matches')->nullable();
             $table->smallInteger('active')->default(0);
+            $table->smallInteger('visible')->default(1);
             $table->integer('price')->nullable();
             $table->integer('high_prize')->nullable();
             $table->integer('low_prize')->nullable();
             $table->dateTime('start_date', $precision = 0)->nullable();
             $table->dateTime('end_date', $precision = 0)->nullable();
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

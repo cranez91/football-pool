@@ -65,6 +65,15 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
         ],
 
+        'broadcasters' => [
+            'driver' => 'local',
+            'root' => env('BROADCASTERS_PATH', public_path('broadcasters')),
+            'url' => env('APP_URL').'/img/broadcasters',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*

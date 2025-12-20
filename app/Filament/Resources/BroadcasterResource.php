@@ -20,6 +20,8 @@ class BroadcasterResource extends Resource
     protected static ?string $model = Broadcaster::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Catalogs';
+    protected static ?string $pluralModelLabel = 'Broadcasters';
 
     public static function form(Form $form): Form
     {

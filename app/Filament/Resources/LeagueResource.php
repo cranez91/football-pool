@@ -21,6 +21,8 @@ class LeagueResource extends Resource
     protected static ?string $model = League::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Catalogs';
+    protected static ?string $pluralModelLabel = 'Leagues';
 
     public static function form(Form $form): Form
     {

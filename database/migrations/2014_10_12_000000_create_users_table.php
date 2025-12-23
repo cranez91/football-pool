@@ -17,11 +17,11 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('whatsapp', 10)->unique();
+            $table->string('whatsapp', 10)->unique()->nullable();
             $table->string('password');
             $table->string('facebook_id')->nullable();
             $table->string('profile_photo')->nullable();
-            $table->string('type', 1)->default('G'); /* S= Super User (Super Usuario), O=Owner (Quinielo), G=Gamer (Jugador) */
+            $table->string('type', 1)->default('A'); /* A= Admin, O=Owner (Quinielo), G=Gamer (Jugador) */
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

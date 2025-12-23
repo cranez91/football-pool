@@ -5,8 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
   
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasFactory;
     use Notifiable;
@@ -60,5 +62,10 @@ class User extends Authenticatable
     public function userMatches()
     {
         return $this->hasMany('App\Models\UserMatchday', 'user_id', 'id');
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->type === 'A' && $this->hasVerifiedEmail();
     }
 }

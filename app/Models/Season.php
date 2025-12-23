@@ -26,4 +26,9 @@ class Season extends Model
         return $this->attributes['current'] ? 'Si' : 'No';
     }
 
+    public function league()
+    {
+        return $this->belongsTo('App\Models\League', 'league_id', 'id');
+    }
+
 }

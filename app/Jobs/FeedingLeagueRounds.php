@@ -71,9 +71,9 @@ class FeedingLeagueRounds implements ShouldQueue
 
                 $newGame = $this->createGame($gameRound->id, $game, $timestamp);
 
-                $match = Matchup::firstOrCreate( ['game_id' => $game['fixture']['id'] ],
+                $match = Matchup::firstOrCreate( ['game_id' => $game['fixture']['id'], 'matchday_id' => $objMatchday->id ],
                     [
-                        'matchday_id' => $objMatchday->id
+                        'result' => ''
                     ]
                 );
 
@@ -112,41 +112,38 @@ class FeedingLeagueRounds implements ShouldQueue
 
     private function createRound($current, $round, $leagueId) {
         $isCurrent = $current[0] == $round ? 1 : 0;
-        $rnd = Round::firstOrCreate( ['name' => $round],
+        $newRound = Round::firstOrCreate( ['name' => $round, 'league_id' => $leagueId],
             [
-                'league_id' => $leagueId,
                 'current' => 0,
             ]
         );
-        $rnd->current = $isCurrent;
-        $rnd->update();
-        return $rnd;
+        $newRound->current = $isCurrent;
+        $newRound->update();
+        return $newRound;
     }
 
     private function createMatchday($current, $round, $leagueId) {
         $isCurrent = $current[0] == $round ? 1 : 0;
-        $mday = Matchday::firstOrCreate( ['name' => $round],
+        $matchday = Matchday::firstOrCreate( ['name' => $round, 'league_id' => $leagueId],
             [
                 'slug' => Str::slug($round, '-'),
-                'league_id' => $leagueId,
                 'current' => 0,
                 'active' => 0,
                 'price' => config('app.matchday_price'),
             ]
         );
-        $mday->current = $isCurrent;
-        $mday->update();
-        return $mday;
+        $matchday->current = $isCurrent;
+        $matchday->update();
+        return $matchday;
     }
 
     private function createGame ($gameRoundId, $game, $timestamp) {
-        $newGame = Game::firstOrCreate( ['id' => $game['fixture']['id']],
+        $newGame = Game::firstOrCreate( ['id' => $game['fixture']['id'], 'round_id' => $gameRoundId],
             [
-                'round_id' => $gameRoundId,
                 'home_id' => $game['teams']['home']['id'], 
                 'away_id' => $game['teams']['away']['id'], 
-                'home_score' => 0, 
-                'away_score' => 0, 
+                'home_score' => $game['goals']['home'], 
+                'away_score' => $game['goals']['away'], 
                 'referee' => $game['fixture']['referee'], 
                 'date' => $timestamp->format('Y-m-d'),
                 'time' => $timestamp->format('H:i'), 

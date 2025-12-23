@@ -1,63 +1,41 @@
 @extends('layouts.app')
 
+
 @section('content')
-<div class="container p-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-10">
-            <p>
-                * Da clic en el nombre de la Jornada para desplegar la información de los juegos.
-            </p>
-            <p>
-                * Si la Jornada está actualmente expandida, vuelve a dar clic en el nombre para contraerla.
-            </p>
-            <div class="accordion" id="accordionRounds">
-                @foreach($rounds as $index => $round)
-                    <div class="accordion-item bg-dark-blue">
-                        <h2 class="accordion-header" id="{{'heading' . ($index + 1) }}">
-                        <button type="button" data-bs-toggle="collapse" data-bs-target="#{{'collapse' . ($index + 1) }}" aria-expanded="false"
-                            class="accordion-button bg-secondary text-black collapsed" aria-controls="{{'collapse' . ($index + 1) }}"
-                        >
-                            {{ $round->name }}
-                        </button>
-                        </h2>
-                        <div id="{{'collapse' . ($index + 1) }}" aria-labelledby="{{'heading' . ($index + 1) }}" data-bs-parent="#accordionRounds"
-                            class="{{ 'accordion-collapse collapse ' . ($round->current ? 'show' : '') }}">
-                            <div class="accordion-body table-responsive mb-2">
-                                <table class="table bg-dark-blue text-white ">
-                                    <thead>
-                                        <tr>
-                                            <th class="text-center"> Partido </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                @foreach ($round->games as $game)
-                                                    <game content="{{ json_encode($game) }}"
-                                                        type="readonly"
-                                                        date="{{ \Carbon\Carbon::parse($game->date)->format('d/m/Y') }}"
-                                                        time="{{ \Carbon\Carbon::parse($game->time)->format('h:i') }}"
-                                                    ></game>
-                                                @endforeach
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+    @guest
+        <div class="alert alert-warning" role="alert">
+            <a class="text-black" role="button" href="/register"> Registrate </a>
+            o 
+            <a class="text-black" role="button" href="/login"> inicia sesión </a>
+            para jugar
+        </div>
+    @endguest
+
+    <div class="container">
+        <div class="row justify-content-center">
+            @foreach($rounds as $round)
+                <div class="col-10 col-md-4 col-lg-2 pt-4">
+                    <div class="{{ 'card border-light' . ( $round->current ? ' bg-info' : ' bg-dark-blue') }}">
+                        <img src="{{ $round->league->logo }}" class="card-img-top" style="width:80%;margin-left: 10%;margin-top: 10%;">
+                        <div class="card-body text-center">
+                            <p class="card-text">{{ $round->name }}</p>
                             @if(Auth::user() && $round->active)
-                                <div class="d-grid gap-2 col-6 mx-auto mb-4">
-                                    <a href="/jornada/{{ $round->slug }}/quiniela" class="btn btn-success">Jugar</a>
+                                <div class="d-grid gap-2 col-6 mx-auto">
+                                    <a href="/jornada/{{ $round->slug }}/quiniela" class="btn btn-success mb-4">Jugar</a>
+                                </div>
+                            @elseif(!Auth::user() && $round->active)
+                                <div class="d-grid gap-2 col-6 mx-auto">
+                                    <a href="/quiniela/{{ $round->slug }}/participantes" class="btn btn-success mb-4">Jugar</a>
                                 </div>
                             @else
-                                <div class="d-grid gap-2 col-6 mx-auto mb-4">
-                                    <a href="/quiniela/{{ $round->slug }}/participantes" class="btn btn-warning">Ver Quiniela</a>
+                                <div class="d-grid gap-2 col-6 mx-auto">
+                                    <a href="/quiniela/{{ $round->slug }}/participantes" class="btn btn-warning mb-4">Ver</a>
                                 </div>
                             @endif
                         </div>
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @endforeach
         </div>
     </div>
-</div>
 @endsection

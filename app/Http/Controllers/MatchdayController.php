@@ -4,10 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Matchday;
 use App\Models\Tournament;
+use App\Models\Distribuitor;
 use App\Http\Requests\StoreMatchdayRequest;
 use App\Http\Requests\UpdateMatchdayRequest;
 use App\Services\RapidApi;
 use Illuminate\Support\Str;
+use App\Imports\ExcelImport;
+use Maatwebsite\Excel\Importer;
+use Maatwebsite\Excel\Events\ImportFailed;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Log;
 
 class MatchdayController extends Controller
 {
@@ -36,6 +43,40 @@ class MatchdayController extends Controller
         ->where('slug', $slug)
         ->first();
         return view('catalogs.matchdays.gamers', compact('matchday'));
+    }
+
+    public function import(string $slug)
+    {
+        $matchday = Matchday::where('slug', $slug)->first();
+        $distribuitors = Distribuitor::where('active', 1)->get();
+        return view("catalogs.matchdays.import", compact('distribuitors', 'matchday'));
+    }
+
+    public function upload(Request $request, Importer $importer)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xls,xlsx|max:2048', // Valida el formato del archivo
+        ]);
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+
+            try {
+                Excel::import(new ExcelImport, $file);
+
+                return redirect()->back()->with('success', 'Archivo importado correctamente.');
+            } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+                $failures = $e->failures();
+                foreach ($failures as $failure) {
+                    Log::error([
+                        'row' => $failure->row(),
+                        'errors' => $failure->errors()
+                    ]);
+                }
+                
+                return redirect()->back()->with('error', 'Error de validación en el archivo.');
+            }
+        }
     }
 
     /**

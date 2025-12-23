@@ -2,6 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Models\Country;
+use App\Models\League;
+use App\Models\Season;
+use App\Models\Team;
+use App\Services\RapidApi;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,29 +14,21 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use App\Services\RapidApi;
-use App\Models\Country;
-use App\Models\League;
-use App\Models\Season;
-use App\Models\Broadcaster;
-use App\Models\Team;
 use Illuminate\Support\Str;
+
 
 class FeedingCatalogs implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private static $countries = [
-        /*'FR' => ['active' => 0],
-        'GB' => ['active' => 0],
-        'DE' => ['active' => 0],
-        'IT' => ['active' => 0],
-        'ES' => ['active' => 0],*/
+        /*'FR' => ['active' => 0],*/
+        'GB' => ['active' => 1],
+        'DE' => ['active' => 1],
+        'IT' => ['active' => 1],
+        'ES' => ['active' => 1],
         'MX' => ['active' => 1]
     ];
-
-    private $broadcasters;
-    private $broadcasterTeams;
 
     /**
      * Create a new job instance.
@@ -40,15 +37,7 @@ class FeedingCatalogs implements ShouldQueue
      */
     public function __construct()
     {
-        $this->broadcasterTeams = [
-            'TUDN' => ['Club America', 'U.N.A.M. - Pumas', 'Toluca', 'Cruz Azul', 'Guadalajara Chivas'],
-            'TV AZTECA' => ['Mazatlán', 'Puebla', 'Necaxa', 'Atlas', 'Club Tijuana'],
-            'Fox Sports' => ['Leon', 'Pachuca', 'Monterrey', 'FC Juarez', 'Club Queretaro'],
-            'ESPN' => ['Atletico San Luis'],
-            'Afizzionados' => ['Tigres UANL'],
-            'Vix+' => ['Santos Laguna'],
-        ];
-        $this->broadcasters = Broadcaster::get();
+
     }
 
     /**
@@ -59,19 +48,25 @@ class FeedingCatalogs implements ShouldQueue
     public function handle()
     {
         Log::info('Fetching catalogs in background.');
+
         $activeSeason = null;
+
         foreach (self::$countries as $code => $cty) {
+            $country = null;
             $response = RapidApi::getCountryByCode($code);
             $response = array_shift($response);
-            $country = Country::firstOrCreate( ['code' => $response['code']],
-                [
-                    'name' => $response['name'],
-                    'flag' => $response['flag'],
-                    'active' => $cty['active']
-                ]
-            );
 
-            if ($cty['active']) {
+            if (!empty($response)) {
+                $country = Country::firstOrCreate( ['code' => $response['code']],
+                    [
+                        'name' => $response['name'],
+                        'flag' => $response['flag'],
+                        'active' => $cty['active']
+                    ]
+                );
+            }
+
+            if ($country && $cty['active']) {
                 $leagues = RapidApi::getLeaguesByCountry($response['code']);
                 $league = array_shift($leagues);
                 $newLeague = League::firstOrCreate( ['slug' => Str::slug($league['league']['name'], '-')],
@@ -84,34 +79,30 @@ class FeedingCatalogs implements ShouldQueue
                 );
 
                 foreach ($league['seasons'] as $season) {
-                    $newSeason = Season::firstOrCreate( ['year' => $season['year']],
+                    $newSeason = Season::firstOrCreate( ['year' => $season['year'], 'league_id' => $league['league']['id'] ],
                         [
                             'start' => $season['start'],
                             'end' => $season['end'],
-                            'league_id' => $league['league']['id'],
                             'current' => $season['current']
                         ]
                     );
-                    if ($newSeason->current) $activeSeason = $newSeason;
+
+                    if ($newSeason->current) {
+                        $activeSeason = $newSeason;
+                    }
                 }
 
                 $teams = RapidApi::getTeamsByLeague($league['league']['id'], $activeSeason->year);
                 foreach ($teams as $team) {
 
-                    $objBroadcaster = null;
-                    foreach ($this->broadcasterTeams as $broadcaster => $teams) {
-                        if (in_array($team['team']['name'], $teams)) {
-                            $objBroadcaster = $this->broadcasters->where('name', $broadcaster)->first();
-                            break;
-                        }
-                    }
                     $newTeam = Team::firstOrCreate( ['id' => $team['team']['id']],
                         [
                             'name' => $team['team']['name'],
+                            'nickname' => '',
                             'code' => $team['team']['code'],
                             'logo' => $team['team']['logo'],
                             'league_id' => $league['league']['id'],
-                            'broadcaster_id' => $objBroadcaster->id,
+                            'broadcaster_id' => null,
                             'active' => 1,
                             'city' => $team['venue']['city'],
                             'stadium' => $team['venue']['name'],
@@ -123,6 +114,6 @@ class FeedingCatalogs implements ShouldQueue
                 }
             }
         }
-        Log::info('Fetching catalogs finished.');
+        Log::info('Fetching catalogs process finished.');
     }
 }

@@ -21,8 +21,8 @@ class CreateGamesTable extends Migration
             $table->integer('home_score')->nullable();
             $table->integer('away_score')->nullable();
             $table->string('referee', 100)->nullable();
-            $table->date('date');
-            $table->time('time');
+            $table->date('date')->nullable()->default(null);
+            $table->time('time')->nullable()->default(null);
             $table->string('status', 5);
             $table->timestamps();
         });

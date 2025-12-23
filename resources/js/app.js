@@ -1,35 +1,38 @@
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
- */
+import './bootstrap';
+import '../css/app.css';
+import '@tailwindplus/elements'
 
-require('./bootstrap');
+import { createApp, h } from 'vue';
+import { createInertiaApp, Link } from '@inertiajs/vue3';
+import { createPinia } from 'pinia';
+import { resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
+import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
-window.Vue = require('vue').default;
+//import Header from '@/components/layout/Header.vue';
+//import Footer from '@/components/layout/Footer.vue';
+//import AddToCartButton from "@/components/products/AddToCartButton.vue";
+//import CartItems from "@/components/products/CartItems.vue";
 
-/**
- * The following block of code may be used to automatically register your
- * Vue components. It will recursively scan this directory for the Vue
- * components and automatically register them with their "basename".
- *
- * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
- */
+const pinia = createPinia();
 
-// const files = require.context('./', true, /\.vue$/i)
-// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
+createInertiaApp({
+  resolve: (name) => 
+    resolvePageComponent(
+      `./Pages/${name}.vue`,
+      import.meta.glob("./Pages/**/*.vue")
+    ),
+  setup({ el, App, props, plugin}) {
+    const app = createApp({ render: () => h(App, props) })
+      .use(plugin)
+      .use(ZiggyVue)
+      .use(pinia)
 
-Vue.component('game', require('./components/front/games/Game.vue').default);
+    //app.component('Header', Header)
+    //app.component('Footer', Footer)
+    //app.component('add-to-cart', AddToCartButton)
+    //app.component('cart-items', CartItems)
+    //app.component('Link', Link)
 
-Vue.component('create-country', require('./components/catalogs/countries/CreateCountry.vue').default);
-Vue.component('create-national-team', require('./components/catalogs/national_teams/CreateNationalTeam.vue').default);
-Vue.component('create-team', require('./components/catalogs/teams/CreateTeam.vue').default);
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
-
-const app = new Vue({
-    el: '#app',
+    app.mount(el)
+  },
 });

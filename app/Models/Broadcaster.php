@@ -11,6 +11,7 @@ class Broadcaster extends Model
 
     protected $table = 'broadcasters';
     protected $primaryKey = 'id';
+    protected $fillable = ['name', 'logo'];
     protected $appends = ['full_logo_src'];
 
     public function teams()

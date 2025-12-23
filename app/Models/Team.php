@@ -17,6 +17,7 @@ class Team extends Model
         'id',
         'code',
         'name',
+        'nickname',
         'logo',
         'active',
         'city',
@@ -24,8 +25,7 @@ class Team extends Model
         'stadium_address',
         'stadium_image',
         'stadium_capacity',
-        'league_id',
-        'broadcaster_id'
+        'league_id'
     ];
     protected $hidden = [
         'created_at',
@@ -35,11 +35,6 @@ class Team extends Model
     public function league()
     {
         return $this->belongsTo('App\Models\League', 'league_id', 'id');
-    }
-
-    public function broadcaster()
-    {
-        return $this->belongsTo('App\Models\Broadcaster', 'broadcaster_id', 'id');
     }
 
     public function getFullLogoSrcAttribute()

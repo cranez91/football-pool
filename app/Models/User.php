@@ -5,8 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
   
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasFactory;
     use Notifiable;
@@ -21,6 +23,7 @@ class User extends Authenticatable
         'name',
         'type',
         'email',
+        'whatsapp',
         'password',
         'facebook_id',
         'profile_photo'
@@ -55,4 +58,14 @@ class User extends Authenticatable
     protected $appends = [
         'profile_photo_url',
     ];
+
+    public function userMatches()
+    {
+        return $this->hasMany('App\Models\UserMatchday', 'user_id', 'id');
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->type === 'A' && $this->hasVerifiedEmail();
+    }
 }

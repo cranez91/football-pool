@@ -33,7 +33,8 @@ class CheckingWinners implements ShouldQueue
      */
     public function __construct()
     {
-        $this->validateCurrentMatchday();
+        //$this->validateCurrentMatchday();
+        $this->currMatchday = Matchday::current();
     }
 
     /**
@@ -47,43 +48,42 @@ class CheckingWinners implements ShouldQueue
         DB::beginTransaction();
         if ($this->currMatchday) {
             $this->checkResults();
-            if ($this->closeMatchday()) {
-                $this->currMatchday->active = 0;
+            if ($this->readyForWinners()) {
                 $this->setPrize();
-                $this->currMatchday->update();
-
-                if ($this->readyForWinners()) {
-                    $this->setWinners();
-                }
+                $this->setWinners();
             }
         }
         DB::commit();
         Log::info('Checking winners finished.');
     }
 
-    private function validateCurrentMatchday()
+    private function isTimeToCheckWinners()
     {
-        $curr = Matchday::current();
-        $endDate = Carbon::parse($curr->end_date, self::MEX_TIMEZONE);
         $now = Carbon::now(self::MEX_TIMEZONE);
-        if ($endDate->diffInHours($now) > 24) {
-            $curr->current = 0;
-            $curr->update();
-            $this->setCurrentMatchday();
-            return;
+        if (isset($this->currMatchday->end_date)) {
+            $endDate = Carbon::parse($this->currMatchday->end_date, self::MEX_TIMEZONE);
+            if ($endDate->diffInHours($now) > 4) {
+                return true;
+            }
         }
-        $this->currMatchday = $curr;
+        return false;
+        
     }
 
     private function setCurrentMatchday()
     {
         $now = Carbon::now(self::MEX_TIMEZONE)->format('Y-m-d H:i');
-        $curr = Matchday::whereRaw("
-            '$now' BETWEEN DATE_SUB(start_date, INTERVAL 3 DAY) AND DATE_ADD(end_date, INTERVAL 1 DAY)
-        ")->first();
-        $curr->current = 1;
-        $curr->update();
-        $this->currMatchday = $curr;
+        $curr = Matchday::whereRaw("start_date >= '$now'")->first();
+        Log::info('setCurrentMatchday:', ['curr' => json_encode($curr)]);
+        if ($curr) {
+            $curr->update([
+                /*'current' => 1,*/
+                'active' => 1,
+                'visible' => 1
+            ]);
+            $this->currMatchday = $curr;
+        }
+        
     }
 
     private function closeMatchday() {
@@ -94,17 +94,16 @@ class CheckingWinners implements ShouldQueue
     }
 
     private function readyForWinners() {
-        $end = $this->currMatchday->end_date;
-        $endDate = Carbon::parse($end, self::MEX_TIMEZONE);
+        $endDate = Carbon::parse($this->currMatchday->end_date, self::MEX_TIMEZONE);
         $now = Carbon::now(self::MEX_TIMEZONE);
-        return $now->greaterThan($endDate);
+        return $now->greaterThan($endDate) && $now->diffInHours($endDate) > 4;
     }
 
     private function checkResults() {
         $this->updateScores();
         foreach ($this->currMatchday->matches as $match) {
             $game = $match->game;
-            if ($game->status == 'FT' && !$match->result) {
+            if ($game->status == 'FT') {
                 if ($game->home_score > $game->away_score) {
                     $match->result = 'L';
                 } elseif ($game->home_score < $game->away_score) {
@@ -149,6 +148,7 @@ class CheckingWinners implements ShouldQueue
         $price = $this->currMatchday->price;
         $gamers = $this->currMatchday->userMatchdays()->where('paid', 1)->count();
         $this->currMatchday->high_prize = $price * $gamers * self::PRIZE_PERCENT;
+        $this->currMatchday->update();
     }
 
     private function setWinners() {
@@ -163,8 +163,10 @@ class CheckingWinners implements ShouldQueue
                 $winners[$top][] = $gamer->id;
             }
         }
-        $this->currMatchday->userMatchdays()
-            ->whereIn('id', array_values( $winners[$top] ) )
-            ->update(['winner' => 1]);
+        if ($winners) {
+            $this->currMatchday->userMatchdays()
+                ->whereIn('id', array_values( $winners[$top] ) )
+                ->update(['winner' => 1]);
+        }
     }
 }

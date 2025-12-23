@@ -13,10 +13,22 @@ class Season extends Model
     protected $primaryKey = 'id';
     public $incrementing = true;
     protected $fillable = ['id', 'year', 'current', 'start', 'end', 'league_id'];
+    protected $appends = ['is_current'];
+    
     protected $hidden = [
         'id',
         'created_at',
         'updated_at'
     ];
+
+    public function getIsCurrentAttribute()
+    {
+        return $this->attributes['current'] ? 'Si' : 'No';
+    }
+
+    public function league()
+    {
+        return $this->belongsTo('App\Models\League', 'league_id', 'id');
+    }
 
 }

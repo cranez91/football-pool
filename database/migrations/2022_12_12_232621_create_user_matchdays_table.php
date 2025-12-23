@@ -18,12 +18,14 @@ class CreateUserMatchdaysTable extends Migration
             $table->uuid('uuid');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('matchday_id');
+            $table->unsignedBigInteger('distribuitor_id')->nullable();
             $table->smallInteger('paid');
             $table->smallInteger('winner');
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('matchday_id')->references('id')->on('matchdays');
+            $table->foreign('distribuitor_id')->references('id')->on('distribuitors');
         });
     }
 

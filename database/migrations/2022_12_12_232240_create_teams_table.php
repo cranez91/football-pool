@@ -17,6 +17,7 @@ class CreateTeamsTable extends Migration
             $table->unsignedBigInteger('id');
             $table->string('code',5)->nullable();
             $table->string('name', 100);
+            $table->string('nickname', 100);
             $table->string('logo', 300);
             $table->string('city', 100);
             $table->string('stadium', 100);
@@ -25,7 +26,6 @@ class CreateTeamsTable extends Migration
             $table->bigInteger('stadium_capacity');
             $table->smallInteger('active');
             $table->unsignedBigInteger('league_id');
-            $table->foreignId('broadcaster_id')->constrained('broadcasters')->nullable();
             $table->timestamps();
         });
     }

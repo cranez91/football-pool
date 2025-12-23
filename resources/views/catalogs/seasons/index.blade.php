@@ -14,7 +14,7 @@
                                 <tr>
                                     <th scope="col">#</th>
                                     <th scope="col">Temporada</th>
-                                    <th scope="col">Activo</th>
+                                    <th scope="col">Actual</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -28,8 +28,8 @@
                                 @foreach($seasons as $index => $season)
                                     <tr>
                                         <th scope="row">{{ ++$index }}</th>
-                                        <td>{{ $season->name }}</td>
-                                        <td>{{ $season->is_active }}</td>
+                                        <td>{{ $season->year }}</td>
+                                        <td>{{ $season->is_current }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

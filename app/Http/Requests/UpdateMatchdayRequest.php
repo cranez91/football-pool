@@ -30,6 +30,7 @@ class UpdateMatchdayRequest extends FormRequest
             'number_matches' => 'sometimes|integer',
             'tournament_id' => 'sometimes|integer|exists:tournaments,id',
             'active' => 'sometimes|integer|min:0|max:1',
+            'visible' => 'sometimes|integer|min:0|max:1',
             'price' => 'sometimes|integer|min:0',
             'high_prize' => 'nullable|integer|min:0',
             'low_prize' => 'nullable|integer|min:0',

@@ -13,7 +13,7 @@ class UserMatchday extends Model
     protected $primaryKey = 'id';
     public $incrementing = true;
     protected $appends = ['is_paid', 'is_winner'];
-    protected $fillable = ['uuid','user_id', 'matchday_id', 'paid', 'winner'];
+    protected $fillable = ['uuid','user_id', 'matchday_id', 'distribuitor_id', 'paid', 'winner'];
     protected $hidden = [
         'created_at',
         'updated_at'

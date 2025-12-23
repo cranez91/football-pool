@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-12 col-md-10">
+        <div class="col-12 mt-5">
             <div class="card">
                 <div class="card-header bg-dark-blue text-center">¡Conoce nuestro competencia!</div>
 
@@ -26,7 +26,7 @@
                                     <tbody>
                                         <tr>
                                             <th scope="row">1.-</th>
-                                            <td>Solo ingresa a esta plataforma para tener la oportunidad de participar</td>
+                                            <td>Ingresa/Registrate en esta plataforma para tener la oportunidad de participar</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">2.-</th>
@@ -38,10 +38,14 @@
                                         </tr>
                                         <tr>
                                             <th scope="row">4.-</th>
-                                            <td>Llena tu quiniela (una vez ingresada, no podrá ser modificada)</td>
+                                            <td>Llena tu quiniela(s) (una vez ingresada, no podrá ser modificada)</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">5.-</th>
+                                            <td>Paga tu quiniela con cualquiera de nuestros distribuidores (quiniela no pagada, NO participa)</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">6.-</th>
                                             <td>Al finalizar la jornada, ¡revisa la tabla de posiciones!</td>
                                         </tr>
                                     </tbody>
@@ -58,16 +62,16 @@
                                     <tbody>
                                         <tr>
                                             <th scope="row">1.-</th>
-                                            <td>Premio en efectivo de la jornada: Quien tenga el mayor número de aciertos en la quiniela/jornada será el ganador. La cantidad dependerá del número de participantes; invita a tus familiares y amigos, ¡entre más participantes, mayor será el premio!</td>
+                                            <td>Premio en efectivo de la jornada: Quien tenga el mayor número de aciertos en la quiniela/jornada será el ganador. La cantidad a repartir dependerá del número de participantes; invita a tus familiares y amigos, ¡entre más participantes, mayor será el premio!</td>
                                         </tr>
-                                        <tr>
+                                        {{--<tr>
                                             <th scope="row">2.-</th>
                                             <td>Premio en efectivo acumulado: No te preocupes si no sales ganador de la quiniela/jornada; tus aciertos se irán acumulando y podrás ser el ganador del premio acumulado una vez que haya finalizado el torneo. Así que, ¡Sigue participando!</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">3.-</th>
                                             <td>¡Premios sorpresa al finalizar el torneo!</td>
-                                        </tr>
+                                        </tr>--}}
                                     </tbody>
                                 </table>
                             </div>
@@ -82,16 +86,16 @@
                                     <tbody>
                                         <tr>
                                             <th scope="row">1.-</th>
-                                            <td>Premio en efectivo de la jornada: En caso de un empate entre dos o más participantes en el primer lugar, el premio acumulado de la jornada se repartirá.</td>
+                                            <td>Premio en efectivo de la jornada: En caso de un empate entre dos o más participantes en el primer lugar, el premio acumulado de la jornada se repartirá a partes iguales.</td>
                                         </tr>
-                                        <tr>
+                                        {{--<tr>
                                             <th scope="row">2.-</th>
-                                            <td>Premio en efectivo acumulado: En caso de un empate entre dos o más participantes en el primer lugar, el premio acumulado del torneo se repartirá.</td>
+                                            <td>Premio en efectivo acumulado: En caso de un empate entre dos o más participantes en el primer lugar, el premio acumulado del torneo se repartirá a partes iguales.</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">3.-</th>
                                             <td>Premios sorpresa al finalizar el torneo: Al finalizar el torneo, de la posición 2 al 8, participarán en una rifa en donde se sortearán los premios sorpresa.</td>
-                                        </tr>
+                                        </tr>--}}
                                     </tbody>
                                 </table>
                             </div>

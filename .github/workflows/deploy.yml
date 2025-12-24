@@ -40,14 +40,14 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: |
-            app
-            bootstrap
-            config
-            database
-            public
-            resources
-            routes
-            vendor
+            app/** 
+            bootstrap/**
+            config/**
+            database/**
+            public/**
+            resources/**
+            routes/**
+            vendor/**
             artisan
             composer.json
             composer.lock

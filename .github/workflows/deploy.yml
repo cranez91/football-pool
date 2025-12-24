@@ -43,9 +43,10 @@ jobs:
       - name: Deploy using rsync
         run: |
           rsync -az --delete \
-            --no-perms \
             --no-owner \
             --no-group \
+            --no-perms \
+            --chmod=Du=rwx,Dg=rwx,Do=rx,Fu=rw,Fg=rw,Fo=r \
             --exclude storage \
             --exclude bootstrap/cache \
             --exclude vendor \

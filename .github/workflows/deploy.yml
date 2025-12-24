@@ -42,11 +42,16 @@ jobs:
       
       - name: Deploy using rsync
         run: |
-          rsync -az --delete \
+          rsync -r --delete \
+            --ignore-existing \
+            --omit-dir-times \
+            --no-times \
+            --no-perms \
             --no-owner \
             --no-group \
-            --no-perms \
             --chmod=Du=rwx,Dg=rwx,Do=rx,Fu=rw,Fg=rw,Fo=r \
+            --exclude .git \
+            --exclude .github \
             --exclude storage \
             --exclude bootstrap/cache \
             --exclude vendor \

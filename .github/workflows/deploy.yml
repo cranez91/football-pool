@@ -33,27 +33,12 @@ jobs:
       - name: Build Assets
         run: npm run build
       
-      - name: Deploy to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: |
-            app/** 
-            bootstrap/**
-            config/**
-            database/**
-            public/**
-            resources/**
-            routes/**
-            vendor/**
-            artisan
-            composer.json
-            composer.lock
-            package.json
-            vite.config.js
-          target: ${{ secrets.APP_DIR }}
+      - name: Deploy using rsync
+        run: |
+          rsync -az --delete \
+            --exclude storage \
+            --exclude bootstrap/cache \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.APP_DIR }}
       
       - name: Run Laravel commands on server
         uses: appleboy/ssh-action@v1.0.3

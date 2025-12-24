@@ -40,11 +40,19 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: |
-            .
-            !storage
-            !bootstrap/cache
-            !node_modules
-            !.git
+            app
+            bootstrap
+            config
+            database
+            public
+            resources
+            routes
+            vendor
+            artisan
+            composer.json
+            composer.lock
+            package.json
+            vite.config.js
           target: ${{ secrets.APP_DIR }}
       
       - name: Run Laravel commands on server

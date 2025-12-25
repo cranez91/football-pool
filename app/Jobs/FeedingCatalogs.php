@@ -22,8 +22,8 @@ class FeedingCatalogs implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private static $countries = [
-        /*'FR' => ['active' => 0],*/
-        'GB' => ['active' => 1],
+        /*'FR' => ['active' => 0],
+        'GB' => ['active' => 1],*/
         'DE' => ['active' => 1],
         'IT' => ['active' => 1],
         'ES' => ['active' => 1],
